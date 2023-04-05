@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: "traefik:v2.4"
+    command:
+      - "--log.level=INFO"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--providers.docker.defaultRule=HostRegexp(`{_:{{ index .Labels \"com.docker.compose.service\" }}\\..*}`)"
+    ports:
+      - "${PUBLIC_PORT-80}:80"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.traefik.rule: HostRegexp(`{_:traefik\..*}`)
+      traefik.http.services.traefik.loadbalancer.server.port: 8080
+  team-admin:
+    image: nginx:latest
+    volumes:
+      - ./deploy/team-admin:/usr/share/nginx/html:ro
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.team-admin.rule: HostRegexp(`{_:team-admin\..*}`)
+      traefik.http.services.team-admin.loadbalancer.server.port: 80
+  runner-app:
+    image: nginx:latest
+    volumes:
+      - ./deploy/runner-app:/usr/share/nginx/html:ro
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.runner-app.rule: HostRegexp(`{_:runner-app\..*}`)
+      traefik.http.services.runner-app.loadbalancer.server.port: 80
+  backend-2:
+    image: jani888/backend-2.ub2023.hu:latest
+    command: 'php artisan serve --host=0.0.0.0'
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.backend-2.rule: HostRegexp(`{_:backend-2\..*}`)
+      traefik.http.services.backend-2.loadbalancer.server.port: 8000
+    env_file:
+      - ./config/backend-2/.env
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: "db"
+      PMA_USER: "root"
+      PMA_PASSWORD: "password"
+      PMA_ARBITRARY: 1
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.pma.rule: HostRegexp(`{_:pma\..*}`)
+      traefik.http.services.pma.loadbalancer.server.port: 80
+  db:
+    image: mariadb:latest
+    environment:
+      - MARIADB_ROOT_PASSWORD=password
+      - MARIADB_DATABASE=ub2023
+    volumes:
+      - /var/lib/mysql
+      - ./config/db:/docker-entrypoint-initdb.d

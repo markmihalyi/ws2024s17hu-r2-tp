@@ -6,4 +6,4 @@ WORKDIR /app
 RUN npm install -g nodemon
 
 #Give the path of your endpoint
-ENTRYPOINT ["nodemon", "/usr/src/app/server.js"]
+ENTRYPOINT ["nodemon", "/app/app.js"]

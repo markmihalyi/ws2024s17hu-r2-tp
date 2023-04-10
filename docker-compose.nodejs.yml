@@ -5,4 +5,8 @@ services:
       context: .
     working_dir: /app
     volumes:
-      - ./deploy/backend:/app
+      - ./www/backend-nodejs:/app
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.backend.rule: HostRegexp(`{_:backend\..*}`)
+      traefik.http.services.backend.loadbalancer.server.port: 80

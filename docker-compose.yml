@@ -21,7 +21,7 @@ services:
   team-admin:
     image: nginx:latest
     volumes:
-      - ./deploy/team-admin:/usr/share/nginx/html:ro
+      - ./www/team-admin:/usr/share/nginx/html:ro
     labels:
       traefik.enable: "true"
       traefik.http.routers.team-admin.rule: HostRegexp(`{_:team-admin\..*}`)
@@ -29,11 +29,19 @@ services:
   runner-app:
     image: nginx:latest
     volumes:
-      - ./deploy/runner-app:/usr/share/nginx/html:ro
+      - ./www/runner-app:/usr/share/nginx/html:ro
     labels:
       traefik.enable: "true"
       traefik.http.routers.runner-app.rule: HostRegexp(`{_:runner-app\..*}`)
       traefik.http.services.runner-app.loadbalancer.server.port: 80
+  stage-planner:
+    image: nginx:latest
+    volumes:
+      - ./www/stage-planner:/usr/share/nginx/html:ro
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.stage-planner.rule: HostRegexp(`{_:stage-planner\..*}`)
+      traefik.http.services.stage-planner.loadbalancer.server.port: 80
   backend-2:
     image: jani888/backend-2.ub2023.hu:latest
     command: 'php artisan serve --host=0.0.0.0'

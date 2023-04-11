@@ -26,7 +26,7 @@ docker-compose -f docker-compose.yml -f docker-compose.nodejs.yml up -d
 #### With framework
 1. Copy the base project from the assets folder to the www/[task].src folder
 2. Start the app with `npm run start`. You will be able to preview your work on localhost.
-3. When you are done, ** it** by building, and moving the compiled assets to the www/[task] folder
+3. When you are done, **deploy it** by building, and moving the compiled assets to the www/[task] folder
 
 #### Without framework
 1. Work in the www/[task] folder

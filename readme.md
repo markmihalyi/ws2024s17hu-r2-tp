@@ -51,4 +51,3 @@ docker-compose -f docker-compose.yml -f docker-compose.nodejs.yml up -d
 ```shell
 docker-compose -f docker-compose.yml -f docker-compose.nodejs.yml logs -ft backend
 ```
-The test project can be found in this repo, in the file [WS2024_HU_TP_S17_R2_EN_1_1.pdf](https://github.com/ws2024s17hu/ws2024s17hu-r2-tp/blob/master/WS2024_HU_TP_S17_R2_EN_1_1.pdf).

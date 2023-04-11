@@ -1,6 +1,6 @@
 # WS2024 S17 R2 HU Test Project
 ## Urls
-- Team Admin app: http://team.admin.localhost
+- Team Admin app: http://team-admin.localhost
 - Runner app: http://runner-app.localhost
 - Stage Planner app: http://runner-app.localhost
 - Backend: http://backend.localhost

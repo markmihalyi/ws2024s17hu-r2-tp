@@ -2,6 +2,10 @@
 ## Test Project
 
 The test project can be found in this repo, in the file [WS2024_HU_TP_S17_R2_EN_1_1.pdf](https://github.com/ws2024s17hu/ws2024s17hu-r2-tp/blob/master/WS2024_HU_TP_S17_R2_EN_1_1.pdf).
+
+## Assets
+
+You can find the necessary accessories in the repo below: [https://github.com/ws2024s17hu/ws2024s17hu-r2-assets.git](https://github.com/ws2024s17hu/ws2024s17hu-r2-assets.git)
 ## Setup
 ### PHP / Laravel backend
 
@@ -13,7 +17,7 @@ docker-compose -f docker-compose.yml -f docker-compose.php.yml up -d
 ```shell
 docker-compose -f docker-compose.yml -f docker-compose.nodejs.yml up -d
 ```
-## Urls
+## URLs
 - Team Admin app: http://team-admin.localhost
 - Runner app: http://runner-app.localhost
 - Stage Planner app: http://runner-app.localhost

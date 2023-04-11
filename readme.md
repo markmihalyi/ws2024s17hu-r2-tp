@@ -21,18 +21,6 @@ docker-compose -f docker-compose.yml -f docker-compose.nodejs.yml up -d
 - Backend-2: http://backend-2.localhost
 - PhpMyAdmin: http://pma.localhost
 
-## Setup
-### PHP / Laravel backend
-
-```shell
-docker-compose -f docker-compose.yml -f docker-compose.php.yml up -d
-```
-### Node.js backend
-
-```shell
-docker-compose -f docker-compose.yml -f docker-compose.nodejs.yml up -d
-```
-
 ## Development
 ### Frontend
 #### With framework

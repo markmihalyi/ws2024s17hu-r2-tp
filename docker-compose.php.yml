@@ -2,7 +2,7 @@ services:
   backend:
     image: webdevops/php-nginx-dev:8.2
     volumes:
-      - ./deploy/backend-laravel:/app
+      - ./www/backend-laravel:/app
     environment:
       WEB_DOCUMENT_ROOT: /app/public
     labels:

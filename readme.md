@@ -63,7 +63,7 @@ docker-compose -f docker-compose.yml -f docker-compose.nodejs.yml up -d
 
 #### Node.js
 
-1. Work in `www/backend-nodejs`. The entrypoint for your application is `www/backend-node/app.js`.
+1. Work in `www/backend-nodejs`. The entrypoint for your application is `www/backend-nodejs/app.js`.
 2. Preview your work at `http://backend.localhost`. The application automatically reloads using nodemon.
 3. To view the console, use the following command:
 

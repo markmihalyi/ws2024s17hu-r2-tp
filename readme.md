@@ -20,7 +20,7 @@ docker-compose -f docker-compose.yml -f docker-compose.nodejs.yml up -d
 ## URLs
 - Team Admin app: http://team-admin.localhost
 - Runner app: http://runner-app.localhost
-- Stage Planner app: http://runner-app.localhost
+- Stage Planner app: http://stage-planner.localhost
 - Backend: http://backend.localhost
 - Backend-2: http://backend-2.localhost
 - PhpMyAdmin: http://pma.localhost

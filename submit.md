@@ -3,7 +3,7 @@
 1. Backend:
 
 - Node.js
-- Source\Deploy: www\backend
+- Source\Deploy: www\backend-nodejs
 - Base URL: http://backend.localhost/api/v1
 - Additional instruction:
 

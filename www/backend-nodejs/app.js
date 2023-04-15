@@ -1,10 +1,19 @@
-const http = require("http");
-const server = http.createServer((req, res) => {
-    res.writeHead(200, { "Content-Type": "text/html" });
-    res.end("<h1>Backend (Node.js)</h1>");
-});
- 
-server.listen(80, () => {
-  console.log(`Server is running`);
+import express from "express";
+import cors from "cors";
+import mainRouter from "./routers/mainRouter.js";
+
+const app = express();
+
+app.use(express.json());
+app.use(cors());
+
+app.use("/api/v1", mainRouter);
+
+app.get("*", (req, res) => {
+  return res.status(404).json({ message: "Not found" });
 });
 
+const PORT = 80;
+app.listen(PORT, () => {
+  console.log("A backend HTTP szerver elindult. Port: " + PORT);
+});

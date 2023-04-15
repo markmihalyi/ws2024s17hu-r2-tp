@@ -16,7 +16,6 @@
 - Additional instruction:
   - In the deployed version, routes may not work properly without a proper nginx configuration.
   - nginx fix: https://stackoverflow.com/questions/43555282/react-js-application-showing-404-not-found-in-nginx-server
-  - I've done it locally; however, if you don't want to change nginx settings, you should issue the `npm start` command from the `team-admin.src` directory.
 
 3. Runner App:
 

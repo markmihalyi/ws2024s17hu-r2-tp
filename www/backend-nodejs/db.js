@@ -10,7 +10,7 @@ const db = mysql.createPool({
 db.getConnection((err) => {
   if (err) throw err;
 
-  console.log("A kapcsolat létrejött az adatbázissal.");
+  console.log("The connection to the database has been established.");
 });
 
 export default db;

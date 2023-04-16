@@ -104,7 +104,7 @@ const ManageTeam: React.FC<Props> = ({ setShowConfirmationWindow }) => {
       </label>
       <input
         className="border border-gray-500 rounded-md pl-2 py-1"
-        type="text"
+        type="email"
         value={contactEmail}
         onChange={contactEmailChanged}
         id="contactEmail"

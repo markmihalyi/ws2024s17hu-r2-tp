@@ -15,5 +15,5 @@ app.get("*", (req, res) => {
 
 const PORT = 80;
 app.listen(PORT, () => {
-  console.log("A backend HTTP szerver elindult. Port: " + PORT);
+  console.log("The backend HTTP server has started. Port: " + PORT);
 });

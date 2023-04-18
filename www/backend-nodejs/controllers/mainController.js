@@ -98,10 +98,12 @@ const handleUpdateOneTeam = async (req, res) => {
     });
   }
 
+  const currentDate = new Date();
+
   await new Promise((resolve) => {
     db.query(
-      "UPDATE teams SET name = ?, location = ?, contactEmail = ? WHERE id = ?",
-      [name, location, contactEmail, teamId],
+      "UPDATE teams SET name = ?, location = ?, contactEmail = ?, updated_at = ? WHERE id = ?",
+      [name, location, contactEmail, currentDate, teamId],
       (err, data) => {
         if (err) {
           return res.status(500).json({
@@ -141,7 +143,7 @@ const handleDeleteOneTeam = async (req, res) => {
     });
   }
 
-  await new Promise((resolve, reject) => {
+  await new Promise((resolve) => {
     db.query("DELETE FROM teams WHERE id = ?", [teamId], (err, data) => {
       if (err) {
         return res.status(500).json({
@@ -223,10 +225,12 @@ const handleCreateRunnerForATeam = async (req, res) => {
 
   const token = Math.random().toString().slice(2, 11);
 
-  await new Promise((resolve, reject) => {
+  const currentDate = new Date();
+
+  await new Promise((resolve) => {
     db.query(
-      "INSERT INTO runners (firstName, lastName, speed, teamId, token) VALUES (?, ?, ?, ?, ?)",
-      [firstName, lastName, speed, teamId, token],
+      "INSERT INTO runners (firstName, lastName, speed, teamId, token, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [firstName, lastName, speed, teamId, token, currentDate, currentDate],
       (err, data) => {
         if (err) {
           return res.status(500).json({
@@ -321,10 +325,12 @@ const handleUpdateRunnerInATeamById = async (req, res) => {
     });
   }
 
-  await new Promise((resolve, reject) => {
+  const currentDate = new Date();
+
+  await new Promise((resolve) => {
     db.query(
-      "UPDATE runners SET firstName = ?, lastName = ?, speed = ? WHERE teamId = ? AND id = ?",
-      [firstName, lastName, speed, teamId, runnerId],
+      "UPDATE runners SET firstName = ?, lastName = ?, speed = ?, updated_at = ? WHERE teamId = ? AND id = ?",
+      [firstName, lastName, speed, currentDate, teamId, runnerId],
       (err, data) => {
         if (err) {
           return res.status(500).json({

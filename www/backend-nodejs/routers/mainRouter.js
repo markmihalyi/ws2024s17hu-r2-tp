@@ -3,11 +3,16 @@ import {
   handleCreateRunnerForATeam,
   handleDeleteOneTeam,
   handleDeleteRunnerFromTeamById,
+  handleFinishHandover,
+  handleGetCurrentRunner,
+  handleGetMe,
+  handleGetNextRun,
   handleGetOneTeam,
   handleGetRunnerFromTeamById,
   handleGetRunnersOfATeam,
   handleGetStages,
   handleLogin,
+  handleStartHandover,
   handleUpdateOneTeam,
   handleUpdateRunnerInATeamById,
 } from "../controllers/mainController.js";
@@ -45,5 +50,12 @@ router.delete(
   adminAuth,
   handleDeleteRunnerFromTeamById
 );
+
+// Schedules
+router.get("/me", userAuth, handleGetMe);
+router.get("/nextRun", userAuth, handleGetNextRun);
+router.get("/currentRunner", userAuth, handleGetCurrentRunner);
+router.post("/handover/start", userAuth, handleStartHandover);
+router.post("/handover/finish", userAuth, handleFinishHandover);
 
 export default router;

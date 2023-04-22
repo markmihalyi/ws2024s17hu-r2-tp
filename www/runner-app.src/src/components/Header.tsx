@@ -4,7 +4,7 @@ const Header = () => {
   const { user } = useData();
 
   return (
-    <header className="w-full bg-blue-2 text-white flex justify-center items-center py-2 font-medium text-lg">
+    <header className="bg-blue-2 text-white py-2 text-center font-medium text-lg">
       UB 2023 - {user?.team.name}
     </header>
   );

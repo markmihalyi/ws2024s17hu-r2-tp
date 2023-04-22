@@ -1,15 +1,18 @@
+import React from "react";
 import useData from "./common/hooks/useData";
 import Header from "./components/Header";
 import AfterStart from "./states/AfterStart";
 import BeforeRace from "./states/BeforeRace";
 import BeforeStart from "./states/BeforeStart";
+import RunnerFinished from "./states/RunnerFinished";
+import TeamFinished from "./states/TeamFinished";
 
-const App = () => {
+function App() {
   const { user, currentState } = useData();
 
   if (user === undefined) {
     return (
-      <main className="min-h-screen min-w-screen flex justify-center items-center text-2xl">
+      <main className="min-w-screen min-h-screen flex justify-center items-center text-2xl">
         Loading...
       </main>
     );
@@ -17,7 +20,7 @@ const App = () => {
 
   if (user === null) {
     return (
-      <main className="min-h-screen min-w-screen flex justify-center items-center text-2xl">
+      <main className="min-w-screen min-h-screen flex justify-center items-center text-2xl">
         Invalid token provided.
       </main>
     );
@@ -26,16 +29,19 @@ const App = () => {
   return (
     <>
       <Header />
-      <main className="w-full h-[94vh] flex flex-col px-5">
-        <h1 className="text-3xl font-bold mt-8">👋 Hi {user?.firstName}!</h1>
-        <h2 className="mt-1 mb-2">Have a good running!</h2>
 
-        {currentState === "beforeStart" && <BeforeStart />}
+      <main className="flex flex-col min-w-screen h-[90vh] px-6">
+        <h1 className="mt-6 text-3xl font-bold">👋 Hi {user.firstName}!</h1>
+        <h2 className="mt-1">Have a good running!</h2>
+
         {currentState === "beforeRace" && <BeforeRace />}
+        {currentState === "beforeStart" && <BeforeStart />}
         {currentState === "afterStart" && <AfterStart />}
+        {currentState === "runnerFinished" && <RunnerFinished />}
+        {currentState === "teamFinished" && <TeamFinished />}
       </main>
     </>
   );
-};
+}
 
 export default App;

@@ -1,329 +1,274 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import React from "react";
 import useData from "../common/hooks/useData";
-import { NextRun, Runner, Stage } from "./BeforeRace";
-
-type CurrentRunner = {
-  runner: Runner;
-  stage: Stage;
-  scheduleDifference: number;
-};
 
 const AfterStart = () => {
-  const { user } = useData();
+  const { user, currentRunner, nextRun, fetchCurrentRunner, fetchNextRun } =
+    useData();
 
-  const [currentRunner, setCurrentRunner] = useState<
-    CurrentRunner | null | undefined
-  >();
-
-  const updateCurrentRunner = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get("/api/v1/currentRunner", {
-        headers: { Authorization: "Bearer " + token },
-      });
-      if (res.data.finished) {
-        setCurrentRunner(null);
-      } else {
-        setCurrentRunner(res.data as CurrentRunner);
-      }
-    } catch (err) {
-      alert("Unknown error occured.");
-      window.location.reload();
-    }
-  };
-
-  const [nextRun, setNextRun] = useState<NextRun | null | undefined>();
-  const updateNextRunner = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get("/api/v1/nextRun", {
-        headers: { Authorization: "Bearer " + token },
-      });
-      if (res.data.finished) {
-        setNextRun(null);
-      } else {
-        setNextRun(res.data as NextRun);
-      }
-    } catch (err) {
-      alert("Unknown error occured.");
-      window.location.reload();
-    }
-  };
-
-  useEffect(() => {
-    updateCurrentRunner();
-    updateNextRunner();
-
-    setInterval(() => {
-      updateCurrentRunner();
-      updateNextRunner();
+  React.useEffect(() => {
+    setInterval(async () => {
+      await fetchCurrentRunner();
+      await fetchNextRun();
     }, 5000);
   }, []);
 
-  const [timeUntilHandover, setTimeUntilHandover] = useState<{
-    hours: string;
-    minutes: string;
-    seconds: string;
-  }>();
-
-  const [currentInterval, setCurrentInterval] = useState(
+  const [currentInterval, setCurrentInterval] = React.useState(
     setInterval(() => {}, 1000)
   );
 
-  useEffect(() => {
-    clearInterval(currentInterval);
+  React.useEffect(() => {
+    if (currentInterval) {
+      clearInterval(currentInterval);
+    }
 
-    if (nextRun?.plannedStartTime) {
+    if (nextRun) {
       const interval = setInterval(() => {
         const currentDate = new Date();
-        const handoverDate = new Date(nextRun.plannedStartTime);
+        const plannedStartTime = new Date(nextRun.plannedStartTime);
 
-        const diffMs = Math.abs(Number(handoverDate) - Number(currentDate));
-        const hours = Math.floor(diffMs / 1000 / 60 / 60);
-        const minutes = Math.floor((diffMs / 1000 / 60) % 60);
-        const seconds = Math.floor((diffMs / 1000) % 60);
+        const hours = Math.abs(
+          plannedStartTime.getHours() - currentDate.getHours()
+        )
+          .toString()
+          .padStart(2, "0");
+        const minutes = Math.abs(
+          plannedStartTime.getMinutes() - currentDate.getMinutes()
+        )
+          .toString()
+          .padStart(2, "0");
+        const seconds = Math.abs(
+          plannedStartTime.getSeconds() - currentDate.getSeconds()
+        )
+          .toString()
+          .padStart(2, "0");
 
-        const hoursFormatted = hours < 10 ? "0" + hours : hours;
-        const minutesFormatted = minutes < 10 ? "0" + minutes : minutes;
-        const secondsFormatted = seconds < 10 ? "0" + seconds : seconds;
-
-        // DEBUG
-        // console.log(
-        //   nextRun?.plannedStartTime,
-        //   hoursFormatted,
-        //   minutesFormatted,
-        //   secondsFormatted
-        // );
-
-        setTimeUntilHandover({
-          hours: String(hoursFormatted),
-          minutes: String(minutesFormatted),
-          seconds: String(secondsFormatted),
-        });
+        setTimeUntilHandover(`${hours}:${minutes}:${seconds}`);
       }, 1000);
       setCurrentInterval(interval);
     }
-  }, [nextRun?.plannedStartTime]);
+  }, [nextRun]);
 
-  if (nextRun === undefined || currentRunner === undefined) return null;
+  const [timeUntilHandover, setTimeUntilHandover] =
+    React.useState<string>("00:00:00");
 
-  const scheduleAhead = currentRunner
-    ? currentRunner?.scheduleDifference < 0
-    : false;
-  const scheduleDifference = Math.abs(currentRunner?.scheduleDifference || 0);
-  const scheduleDiffHours = Math.floor(scheduleDifference / 60 / 60);
-  const scheduleDiffMinutes = Math.floor((scheduleDifference / 60) % 60);
-  const scheduleDiffSeconds = Math.floor(scheduleDifference % 60);
-  const scheduleDiffHoursFormatted =
-    scheduleDiffHours < 10 ? "0" + scheduleDiffHours : scheduleDiffHours;
-  const scheduleDiffMinutesFormatted =
-    scheduleDiffMinutes < 10 ? "0" + scheduleDiffMinutes : scheduleDiffMinutes;
-  const scheduleDiffSecondsFormatted =
-    scheduleDiffSeconds < 10 ? "0" + scheduleDiffSeconds : scheduleDiffSeconds;
+  if (!currentRunner || !user) return null;
 
-  const nextRunStartHours = new Date(
-    nextRun?.plannedStartTime || ""
-  ).getHours();
-  const nextRunStartMinutes = new Date(
-    nextRun?.plannedStartTime || ""
-  ).getMinutes();
-  const nextRunStartHoursFormatted =
-    nextRunStartHours < 10 ? "0" + nextRunStartHours : nextRunStartHours;
-  const nextRunStartMinutesFormatted =
-    nextRunStartMinutes < 10 ? "0" + nextRunStartMinutes : nextRunStartMinutes;
+  const scheduleDifference = new Date(
+    Math.abs(currentRunner.scheduleDifference * 1000)
+  )
+    .toISOString()
+    .substring(11, 19);
+  const aheadOfSchedule = currentRunner.scheduleDifference < 0;
 
-  const nextRunFinishHours = new Date(
-    nextRun?.plannedFinishTime || ""
-  ).getHours();
-  const nextRunFinishMinutes = new Date(
-    nextRun?.plannedFinishTime || ""
-  ).getMinutes();
-  const nextRunFinishHoursFormatted =
-    nextRunFinishHours < 10 ? "0" + nextRunFinishHours : nextRunFinishHours;
-  const nextRunFinishMinutesFormatted =
-    nextRunFinishMinutes < 10
-      ? "0" + nextRunFinishMinutes
-      : nextRunFinishMinutes;
+  if (!nextRun) return null;
 
-  const handoverNowStart = async () => {
+  const plannedStartTime = new Date(nextRun.plannedStartTime)
+    .toISOString()
+    .substring(11, 16);
+  const plannedFinishTime = new Date(nextRun.plannedFinishTime)
+    .toISOString()
+    .substring(11, 16);
+
+  const handleHandoverStart = async () => {
+    const token = localStorage.getItem("token");
     try {
-      const token = localStorage.getItem("token");
       await axios.post(
-        "/api/v1/handover/start",
-        {
-          stageId: nextRun?.stage.id,
-        },
+        "/handover/start",
+        { stageId: nextRun.stage.id },
         { headers: { Authorization: "Bearer " + token } }
       );
-      updateCurrentRunner();
-      updateNextRunner();
+      await fetchCurrentRunner();
+      await fetchNextRun();
     } catch (err) {
       alert("Unknown error occured.");
-      return;
     }
   };
 
-  const handoverNowFinish = async () => {
+  const handleHandoverFinish = async () => {
+    const token = localStorage.getItem("token");
     try {
-      const token = localStorage.getItem("token");
       await axios.post(
-        "/api/v1/handover/finish",
-        {
-          stageId: nextRun?.stage.id,
-        },
+        "/handover/finish",
+        { stageId: nextRun.stage.id },
         { headers: { Authorization: "Bearer " + token } }
       );
-      updateCurrentRunner();
-      updateNextRunner();
+      await fetchCurrentRunner();
+      await fetchNextRun();
     } catch (err) {
       alert("Unknown error occured.");
-      return;
     }
   };
-
-  if (currentRunner) {
-    return (
-      <>
-        {/* current runner informations */}
-        <span className="font-bold text-lg">Current runner</span>
-        <div className="w-full bg-gradient-to-r from-pink to-purple-2 rounded-2xl flex flex-col px-6 text-white py-5 space-y-3 mt-2">
-          <span className="text-xl font-medium">
-            <i className="far fa-user mr-4"></i>{" "}
-            {currentRunner.runner.firstName} {currentRunner.runner.lastName}
-          </span>
-          <div className="flex items-center">
-            <span className="text-xl font-medium mr-4">
-              <i className="far fa-map"></i> {/* missing map-marker icon */}
-            </span>
-            <div className="flex flex-col mr-4">
-              <span>{currentRunner.stage.startingLocation}</span>
-              <span>{currentRunner.stage.arrivalLocation}</span>
-            </div>
-            <span className="border-l border-white pl-3">
-              {currentRunner.stage.distance} km
-            </span>
-          </div>
-          <div className="flex items-center">
-            <span className="text-xl font-medium">
-              <i className="far fa-clock mr-4"></i>
-            </span>
-            <div className="flex flex-col">
-              <span className="text-xl font-medium">
-                {scheduleDiffHoursFormatted}:{scheduleDiffMinutesFormatted}:
-                {scheduleDiffSecondsFormatted}
-              </span>
-              {scheduleDifference !== 0 && (
-                <span className="text-sm">
-                  {scheduleAhead ? "ahead" : "behind"} of schedule
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {nextRun ? (
-          <>
-            {/* time until next run */}
-            {currentRunner.runner.id !== user?.id && (
-              <>
-                <span className="mt-2 text-lg font-bold text-gray-2">
-                  Your next {nextRun.stage.distance} km run 🏃
-                </span>
-                {timeUntilHandover && (
-                  <span className="text-blue-1 text-lg font-medium">
-                    {timeUntilHandover?.hours}:{timeUntilHandover?.minutes}:
-                    {timeUntilHandover?.seconds} UNTIL HANDOVER
-                  </span>
-                )}
-              </>
-            )}
-
-            {/* stages */}
-            <div className="mt-4 w-full bg-gray-1 rounded-2xl flex flex-col px-5 py-4">
-              <span className="font-bold text-xl">
-                {nextRun.stage.startingLocation}
-              </span>
-              <div className="w-full flex justify-between items-center mt-4 mb-6">
-                <span className="px-4 py-1 rounded-3xl border border-blue-1 text-blue-1 text-lg font-medium">
-                  <i className="far fa-user mr-3"></i>
-                  {nextRun.previousRunner?.firstName || user?.firstName}{" "}
-                  {nextRun.previousRunner?.lastName || user?.lastName}
-                </span>
-
-                <span className="font-extrabold text-3xl self-center">
-                  {nextRunStartHoursFormatted}:{nextRunStartMinutesFormatted}
-                </span>
-              </div>
-
-              {currentRunner.runner.id !== user?.id && nextRun.canStart ? (
-                <button
-                  className="bg-blue-1 w-full text-white py-2 rounded-3xl font-medium text-lg"
-                  onClick={handoverNowStart}
-                >
-                  <i className="far fa-check-circle mr-2"></i> Handover now
-                </button>
-              ) : (
-                <button
-                  className="bg-gray-200 w-full text-gray-400 py-2 rounded-3xl font-medium text-lg"
-                  disabled
-                >
-                  <i className="far fa-check-circle mr-2"></i> Handover now
-                </button>
-              )}
-            </div>
-
-            <div className="mt-3 w-full bg-gray-1 rounded-2xl flex flex-col px-5 py-4">
-              <span className="font-bold text-xl">
-                {nextRun.stage.arrivalLocation}
-              </span>
-
-              <div className="w-full flex justify-between items-center mt-4 mb-6">
-                <span className="font-extrabold text-3xl self-center">
-                  {nextRunFinishHoursFormatted}:{nextRunFinishMinutesFormatted}
-                </span>
-                <span className="px-4 py-1 rounded-3xl border border-blue-1 text-blue-1 text-lg font-medium">
-                  <i className="far fa-user mr-3"></i>
-                  {nextRun.nextRunner.firstName} {nextRun.nextRunner.lastName}
-                </span>
-              </div>
-
-              {currentRunner.runner.id === user?.id ? (
-                <button
-                  className="bg-blue-1 w-full text-white py-2 rounded-3xl font-medium text-lg"
-                  onClick={handoverNowFinish}
-                >
-                  <i className="far fa-check-circle mr-2"></i> Handover now
-                </button>
-              ) : (
-                <button
-                  className="bg-gray-200 w-full text-gray-400 py-2 rounded-3xl font-medium text-lg"
-                  disabled
-                >
-                  <i className="far fa-check-circle mr-2"></i> Handover now
-                </button>
-              )}
-            </div>
-          </>
-        ) : (
-          <>
-            <span className="font-bold mt-3 text-lg">You are done!</span>
-            <img src="images/finish.svg" alt="finish" />
-          </>
-        )}
-      </>
-    );
-  }
 
   return (
     <>
-      <div className="rounded-2xl bg-gradient-to-r from-pink to-purple-2 text-white py-4 px-6 text-2xl font-medium">
-        Race finished!
+      {/* CURRENT RUNNER */}
+      <span className="font-bold text-lg mt-3">Current runner</span>
+      <div className="bg-gradient-to-r from-pink to-purple-2 rounded-2xl px-6 py-4 text-white mt-0.5 flex flex-col font-medium text-lg space-y-3">
+        <div className="flex items-center">
+          <i className="far fa-user mr-5"></i>
+          {currentRunner.runner.firstName} {currentRunner.runner.lastName}
+        </div>
+
+        <div className="flex items-center">
+          <i className="far fa-map mr-4"></i>
+          <div className="flex flex-col text-sm">
+            <span>{currentRunner.stage.startingLocation}</span>
+            <span>{currentRunner.stage.arrivalLocation}</span>
+          </div>
+        </div>
+
+        <div className="flex items-center">
+          <i className="far fa-clock mr-4"></i>
+          <div className="flex flex-col">
+            <span>{scheduleDifference}</span>
+            <span className="text-sm">
+              {aheadOfSchedule ? "ahead" : "behind"} of schedule
+            </span>
+          </div>
+        </div>
       </div>
-      <span className="mt-3 font-bold text-lg">
-        You are done! Congratulation!
-      </span>
-      <img src="images/finish.svg" alt="finish" />
+
+      {currentRunner.runner.id !== user.id && (
+        <>
+          <span className="font-bold text-xl text-gray-1 mt-2">
+            Your next {nextRun.stage.distance}km run 🏃
+          </span>
+
+          <span className="text-lg font-medium text-blue-1">
+            {timeUntilHandover} UNTIL HANDOVER
+          </span>
+        </>
+      )}
+
+      {/* PREVIOUS STAGE */}
+      {nextRun.previousRunner === null ? (
+        <div className="mt-4 bg-light px-4 py-3 flex flex-col rounded-2xl">
+          <span className="text-lg font-bold">
+            {nextRun.stage.startingLocation}{" "}
+          </span>
+
+          <div className="flex items-center justify-between">
+            <span className="text-blue-1 border border-blue-1 py-1 px-4  rounded-3xl">
+              <i className="far fa-user mr-2"></i>
+              {user.firstName} {user.lastName}
+            </span>
+
+            <span className="text-center font-extrabold text-3xl my-6">
+              {plannedStartTime}
+            </span>
+          </div>
+
+          <button
+            className="rounded-3xl bg-gray-200 text-gray-400 py-2.5 font-medium text-lg"
+            disabled
+          >
+            <i className="far fa-check-circle mr-2"></i> Handover now
+          </button>
+        </div>
+      ) : (
+        <div className="mt-4 bg-light px-4 py-3 flex flex-col rounded-2xl">
+          <span className="text-lg font-bold">
+            {nextRun.stage.startingLocation}{" "}
+          </span>
+
+          <div className="flex items-center justify-between">
+            <span className="text-blue-1 border border-blue-1 py-1 px-4  rounded-3xl">
+              <i className="far fa-user mr-2"></i>
+              {nextRun.previousRunner?.firstName}{" "}
+              {nextRun.previousRunner?.lastName}
+            </span>
+
+            <span className="text-center font-extrabold text-3xl my-6">
+              {plannedStartTime}
+            </span>
+          </div>
+
+          {nextRun.canStart ? (
+            <button
+              className="rounded-3xl bg-blue-1 text-white py-2.5 font-medium text-lg"
+              onClick={handleHandoverStart}
+            >
+              <i className="far fa-check-circle mr-2"></i> Handover now
+            </button>
+          ) : (
+            <button
+              className="rounded-3xl bg-gray-200 text-gray-400 py-2.5 font-medium text-lg"
+              disabled
+            >
+              <i className="far fa-check-circle mr-2"></i> Handover now
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* NEXT STAGE */}
+      {nextRun.nextRunner === null ? (
+        <div className="mt-4 bg-light px-4 py-3 flex flex-col rounded-2xl">
+          <span className="text-lg font-bold">
+            {nextRun.stage.arrivalLocation}
+          </span>
+
+          <div className="flex items-center justify-between">
+            <span className="text-center font-extrabold text-3xl my-6">
+              {plannedFinishTime}
+            </span>
+
+            <span className="text-blue-1 border border-blue-1 py-1 px-4  rounded-3xl">
+              <i className="far fa-user mr-2"></i>
+              {user.firstName} {user.lastName}
+            </span>
+          </div>
+          {currentRunner.runner.id === user.id ? (
+            <button
+              className="rounded-3xl bg-blue-1 text-white py-2.5 font-medium text-lg"
+              onClick={handleHandoverFinish}
+            >
+              <i className="far fa-check-circle mr-2"></i> Handover now
+            </button>
+          ) : (
+            <button
+              className="rounded-3xl bg-gray-200 text-gray-400 py-2.5 font-medium text-lg"
+              disabled
+            >
+              <i className="far fa-check-circle mr-2"></i> Handover now
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="mt-4 bg-light px-4 py-3 flex flex-col rounded-2xl">
+          <span className="text-lg font-bold">
+            {nextRun.stage.arrivalLocation}
+          </span>
+
+          <div className="flex items-center justify-between">
+            <span className="text-center font-extrabold text-3xl my-6">
+              {plannedFinishTime}
+            </span>
+
+            <span className="text-blue-1 border border-blue-1 py-1 px-4  rounded-3xl">
+              <i className="far fa-user mr-2"></i>
+              {nextRun.nextRunner?.firstName} {nextRun.nextRunner?.lastName}
+            </span>
+          </div>
+
+          {currentRunner.runner.id === user.id ? (
+            <button
+              className="rounded-3xl bg-blue-1 text-white py-2.5 font-medium text-lg"
+              onClick={handleHandoverFinish}
+            >
+              <i className="far fa-check-circle mr-2"></i> Handover now
+            </button>
+          ) : (
+            <button
+              className="rounded-3xl bg-gray-200 text-gray-400 py-2.5 font-medium text-lg"
+              disabled
+            >
+              <i className="far fa-check-circle mr-2"></i> Handover now
+            </button>
+          )}
+        </div>
+      )}
     </>
   );
 };
